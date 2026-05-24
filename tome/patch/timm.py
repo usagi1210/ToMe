@@ -35,7 +35,8 @@ class ToMeBlock(Block):
         # Note: this is copied from timm.models.vision_transformer.Block with modifications.
         attn_size = self._tome_info["size"] if self._tome_info["prop_attn"] else None
         x_attn, metric = self.attn(self.norm1(x), attn_size)
-        x = x + self._drop_path1(x_attn)
+        # timm 0.9.x compat: apply LayerScale (ls1) if present, else identity
+        x = x + self._drop_path1(getattr(self, 'ls1', lambda z: z)(x_attn))
 
         r = self._tome_info["r"].pop(0)
         if r > 0:
@@ -52,7 +53,8 @@ class ToMeBlock(Block):
                 )
             x, self._tome_info["size"] = merge_wavg(merge, x, self._tome_info["size"])
 
-        x = x + self._drop_path2(self.mlp(self.norm2(x)))
+        # timm 0.9.x compat: apply LayerScale (ls2) if present, else identity
+        x = x + self._drop_path2(getattr(self, 'ls2', lambda z: z)(self.mlp(self.norm2(x))))
         return x
 
 
@@ -68,9 +70,11 @@ class ToMeAttention(Attention):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # Note: this is copied from timm.models.vision_transformer.Attention with modifications.
         B, N, C = x.shape
+        # timm 0.9.x compat: use self.head_dim if available, else compute
+        head_dim = getattr(self, 'head_dim', C // self.num_heads)
         qkv = (
             self.qkv(x)
-            .reshape(B, N, 3, self.num_heads, C // self.num_heads)
+            .reshape(B, N, 3, self.num_heads, head_dim)
             .permute(2, 0, 3, 1, 4)
         )
         q, k, v = (
@@ -78,6 +82,11 @@ class ToMeAttention(Attention):
             qkv[1],
             qkv[2],
         )  # make torchscript happy (cannot use tensor as tuple)
+        # timm 0.9.x compat: apply optional QK normalization layers
+        if hasattr(self, 'q_norm'):
+            q = self.q_norm(q)
+        if hasattr(self, 'k_norm'):
+            k = self.k_norm(k)
 
         attn = (q @ k.transpose(-2, -1)) * self.scale
 

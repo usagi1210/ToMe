@@ -1,5 +1,21 @@
+# 数据集 - 体积过大，不上传
+Datasets/
+
+# 实验结果 - 本地生成，不同机器结果不同
+results/*.csv
+results/*.png
+
+# Python 编译产物
 __pycache__/
-*.pyc
+*.py[cod]
 *.egg-info/
 build/
-test.py
+dist/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db

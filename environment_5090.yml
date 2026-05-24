@@ -1,0 +1,22 @@
+# 记录 RTX 5090 (CUDA 12.8) 上实际可运行的包版本
+# 本文件仅作文档用途，不用于 conda create --file
+# 实际运行环境：cassi_116 conda env（已预装 torch/torchvision/scipy 等）
+
+name: cassi_116-tome-doc
+dependencies:
+  - python=3.10.18
+  - pip:
+    - torch==2.7.1+cu128
+    - torchvision==0.22.1+cu128
+    - timm==0.9.16        # 官方要求 0.4.12，已修复兼容性（见 docs/compatibility-notes.md）
+    - scipy==1.15.3
+    - pillow==11.0.0
+    - matplotlib==3.10.3
+    - numpy==2.1.2
+    - tqdm==4.67.1
+    - pytest              # 用于运行 tests/
+
+# 服务器额外安装步骤（cassi_116 env 已有 torch 等，只需追加）：
+#   pip install timm==0.9.16
+#   pip install pytest
+#   cd /home/cassi_116/SPI/ToMe && pip install -e .

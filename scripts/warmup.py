@@ -37,7 +37,7 @@ try:
         _ = torch.mm(a, b)
         torch.cuda.synchronize(device)
         step += 1
-        if step % 100 == 0:
+        if step % 100000 == 0:
             print(f"  step {step}")
 except KeyboardInterrupt:
     del cache, a, b

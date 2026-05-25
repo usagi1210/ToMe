@@ -56,7 +56,7 @@ def benchmark(
             for i in tqdm(range(runs), disable=not verbose, desc="Benchmarking"):
                 if i == warm_up:
                     if is_cuda:
-                        torch.cuda.synchronize()
+                        torch.cuda.synchronize(device)
                     total = 0
                     start = time.time()
 
@@ -64,7 +64,7 @@ def benchmark(
                 total += batch_size
 
     if is_cuda:
-        torch.cuda.synchronize()
+        torch.cuda.synchronize(device)
 
     end = time.time()
     elapsed = end - start
